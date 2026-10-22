@@ -1,0 +1,21 @@
+{
+  "name": "wantaekchoi",
+  "owner": {
+    "name": "wantaekchoi"
+  },
+  "metadata": {
+    "description": "Lens gate for upstream OSS pull requests",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "review-proof-prs",
+      "description": "Verify an upstream PR before it is filed: RED/GREEN reproduction, 11 independent read-only lens agents, and a fact-check gate on the PR body bound to its hash.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/review-proof-prs"
+      ]
+    }
+  ]
+}

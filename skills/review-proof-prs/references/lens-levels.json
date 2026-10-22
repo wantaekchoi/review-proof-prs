@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "note": "렌즈 정족수 정의. lens-record.sh --level <이름> 이 이 파일에 대고 판정문을 검증한다. 렌즈 자체는 lenses/ 가 정의하고, 이 파일은 '몇 개를 어느 것으로 채워야 하는가'만 정한다.",
+  "check": "jq -e '(.levels|to_entries|map(select(.value.deprecated!=true))|all(.value.required|index(0)!=null)) and (.levels|to_entries|all(.value.min_distinct >= (.value.required|length))) and ([.lenses|to_entries[]|.value.alias[],.key]|(length==(unique|length)))' lens-levels.json",
+
+  "always_required": [0],
+  "always_required_why": "SKILL.md §4 — 렌즈 0(전제 파괴)은 규모와 무관하게 항상 돈다. 나머지 렌즈는 '수정이 옳은가'를 묻느라 전제를 참으로 놓아서, 전제가 거짓이면 게이트 전체가 통과시킨다. deprecated 레벨(legacy)만 예외다.",
+
+  "default_level": "legacy",
+  "default_level_why": "LEVEL: 줄이 없는 판정문은 legacy 로 받아 서로 다른 렌즈 4개만 요구하고 경고한다. LENS_STRICT=1 이면 거부.",
+
+  "lenses": {
+    "0":  { "name": "전제 파괴",           "alias": ["전제파괴", "전제"] },
+    "1":  { "name": "회의론/의도",          "alias": ["회의론/의도", "회의론", "의도"] },
+    "2":  { "name": "정확성",              "alias": ["정확성"] },
+    "3":  { "name": "엣지",                "alias": ["엣지"] },
+    "4":  { "name": "부작용",              "alias": ["부작용"] },
+    "5":  { "name": "메커니즘/E2E 충실도",  "alias": ["메커니즘/E2E", "메커니즘", "E2E"] },
+    "6":  { "name": "검증",                "alias": ["검증"] },
+    "7":  { "name": "컨벤션",              "alias": ["컨벤션"] },
+    "8":  { "name": "수용성",              "alias": ["수용성"] },
+    "9":  { "name": "완결성",              "alias": ["완결성"] },
+    "10": { "name": "본문",                "alias": ["본문"] }
+  },
+
+  "levels": {
+    "claim": {
+      "required": [0, 10],
+      "min_distinct": 2,
+      "majority_refutation": null,
+      "desc": "코드가 기계로 이미 증명된 카드와 리뷰 답글 — 전제와 본문만 본다. 문서 표기 정정처럼 diff 가 스크립트 전수 대조로 검증될 때 쓴다. 코드 동작이 바뀌면 쓰지 마라."
+    },
+    "premise": {
+      "required": [0],
+      "min_distinct": 1,
+      "majority_refutation": null,
+      "desc": "문서 표기 정정처럼 정답이 소스로 기계적으로 하나로 떨어지고, 본문이 '무엇이 틀렸나 한 줄 + 증거 블록' 뿐인 카드 — 전제만 본다. 본문에 판단·범위 주장이 한 문장이라도 들어가면 claim 을 쓴다."
+    },
+    "light": {
+      "required": [0, 2, 6],
+      "min_distinct": 3,
+      "majority_refutation": null,
+      "desc": "빠른 확인 — 전제가 서는가·처방이 root cause 인가·증명이 진짜인가만 본다."
+    },
+    "essential": {
+      "required": [0, 1, 2, 6, 10],
+      "min_distinct": 5,
+      "majority_refutation": null,
+      "desc": "기본값 — light 에 의도(반박 봉쇄)와 본문(제출물 사실검증)을 더한다."
+    },
+    "full": {
+      "required": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "min_distinct": 11,
+      "majority_refutation": { "min_refuters": 3 },
+      "desc": "플래그십 — 11개 전부 + 독립 반박자 3인. 반박자 하나라도 refuted=true 면 거부."
+    },
+    "legacy": {
+      "required": [],
+      "min_distinct": 4,
+      "majority_refutation": null,
+      "deprecated": true,
+      "desc": "LEVEL: 줄 없는 판정문. 서로 다른 렌즈 4개만 요구하고 경고한다."
+    }
+  }
+}
